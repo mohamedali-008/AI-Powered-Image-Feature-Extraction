@@ -43,7 +43,7 @@ MediVision is an **AI-driven computer vision application** designed for **featur
 
 **Example Output:**
 
-![SIFT Keypoint Detection](images/sift_keypoints.png)
+![SIFT Keypoint Detection](https://github.com/MO-Nigo/AI-Powered-Image-Feature-Extraction/blob/main/Images/Screenshot%202025-03-08%20073334.png)
 
 ## Installation
 To set up and run the application, install the dependencies:
