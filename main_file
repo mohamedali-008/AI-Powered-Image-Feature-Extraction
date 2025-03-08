@@ -1,0 +1,182 @@
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+import sys
+import cv2 
+import numpy as np
+from PyQt5.uic import loadUiType
+from harris import myHarris
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog
+from imagematching import App
+from sift import generate_image
+ui, _ = loadUiType('main.ui')
+
+class MainApp(QMainWindow, ui):
+    def __init__(self, parent=None):
+        super(MainApp, self).__init__(parent)
+        self.setupUi(self)
+        self.resize(900, 1500)
+        self.image2 = None
+        self.image1 = None
+        self.file_path = None
+        self.file = None
+        self.matching = App()
+         
+        # concetions:
+        
+        self.openbtn.clicked.connect(self.openFile)
+        self.btnGenerate1.clicked.connect(self.generateHarris)
+        self.sliderFactor.valueChanged.connect(self.updateFactorLabel)
+       # connections
+        self.openbtn_4.clicked.connect(lambda: self.openImageDialog(self.openbtn_4))
+        self.openbtn_5.clicked.connect(lambda: self.openImageDialog1(self.openbtn_5))
+        self.btnresult.clicked.connect(self.show_result)
+        self.openbtn_2.clicked.connect(self.load_sift)
+        self.btnGenerate2_2.clicked.connect(self.generate)
+        
+
+        
+    def openFile(self):
+        # Open a file dialog to select an image file
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.file_path, _ = QFileDialog.getOpenFileName(self, "Open Image File", "",
+                                                  "Image Files (*.png *.jpg *.bmp *.jpeg *.tif *.tiff);;All Files (*)",
+                                                  options=options)
+        pixmap = QPixmap(self.file_path)
+        if not pixmap.isNull():
+            scene = QGraphicsScene()
+            scene.addPixmap(pixmap)
+            self.gv1.setScene(scene)
+            self.gv1.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+            
+        
+
+
+    def updateFactorLabel(self, value):
+        # Update the label text with the current value of the slider
+        self.labelFactor.setText(str(value))
+
+        
+    def generateHarris(self):
+        # Get the current value of the slider and the image file path
+        slider_value = self.sliderFactor.value()
+        image_path = self.file_path
+
+        # Read the image data
+        image_data = cv2.imread(image_path)
+
+        # Call the function from harris.py
+        qImg, computation_time = myHarris(image_data, factor=slider_value)
+        
+        computation_time = round(computation_time, 2)
+
+        # Update the label displaying computation time
+        self.labelTime1.setText(str(computation_time) + "s") 
+           
+        pixmap = QPixmap.fromImage(qImg)
+        scene = QGraphicsScene()
+        scene.addPixmap(pixmap)
+        self.gv1.setScene(None)
+        self.gv1.setScene(scene)
+        self.gv1.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+        
+        
+        
+        
+        # feture matching part ueing SSD and NCC 
+    def openImageDialog(self,button):
+           options = QFileDialog.Options()
+           options |= QFileDialog.DontUseNativeDialog
+           fileName, _ = QFileDialog.getOpenFileName(self, "Open Image File", "",
+                                                  "Image Files (*.png *.jpg *.bmp *.jpeg *.tif *.tiff);;All Files (*)",
+                                                  options=options)
+           if fileName:
+              self.image1 = cv2.imread(fileName, cv2.IMREAD_GRAYSCALE)
+              self.loadImage(fileName,button)
+    def openImageDialog1(self,button):
+           options = QFileDialog.Options()
+           options |= QFileDialog.DontUseNativeDialog
+           fileName, _ = QFileDialog.getOpenFileName(self, "Open Image File", "",
+                                                  "Image Files (*.png *.jpg *.bmp *.jpeg *.tif *.tiff);;All Files (*)",
+                                                  options=options)
+           if fileName:
+              self.image2 = cv2.imread(fileName, cv2.IMREAD_GRAYSCALE)
+              self.loadImage(fileName,button)          
+            
+            
+            
+    def loadImage(self, fileName,button):
+          pixmap = QPixmap(fileName)
+          if not pixmap.isNull():
+             if button == self.openbtn_4:
+                 self.image1 =cv2.imread(fileName, cv2.IMREAD_GRAYSCALE)
+                 scene = QGraphicsScene()
+                 scene.addPixmap(pixmap)
+                 self.gv3_2.setScene(scene)
+                 self.gv3_2.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+             elif button == self.openbtn_5 :
+                 self.image2 = cv2.imread(fileName, cv2.IMREAD_GRAYSCALE)
+                 scene = QGraphicsScene()
+                 scene.addPixmap(pixmap)
+                 self.gv4_2.setScene(scene)
+                 self.gv4_2.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+                  
+    def show_result(self):
+        if self.SSD.isChecked():  
+            Type = "SSD"
+        elif self.NCCbtn.isChecked():
+            Type = "NCC"
+        threshold =self.lineEdit.text()    
+        result,computation_time = self.matching.findTemplate( self.image1, self.image2, Type,threshold) 
+        computation_time = round(computation_time, 2)
+       
+
+        # Update the label displaying computation time
+        self.lableTime2_4.setText(str(computation_time) + "s") 
+        pixmap = QPixmap.fromImage(result)
+        scene = QGraphicsScene()
+        scene.addPixmap(pixmap)
+        self.gv5.setScene(scene)
+        self.gv5.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+        # self.lineEdit.clear()
+        
+        
+    def load_sift(self):
+        # Open a file dialog to select an image file
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.file, _ = QFileDialog.getOpenFileName(self, "Open Image File", "",
+                                                  "Image Files (*.png *.jpg *.bmp *.jpeg *.tif *.tiff);;All Files (*)",
+                                                  options=options)
+        pixmap = QPixmap(self.file)
+        if not pixmap.isNull():
+            scene = QGraphicsScene()
+            scene.addPixmap(pixmap)
+            self.gv3.setScene(scene)
+            self.gv3.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)    
+            
+    def generate(self):
+       sift_image , computation_time =   generate_image(self.file)
+       computation_time = round(computation_time, 2)
+       # Update the label displaying computation time
+       self.lableTime2_2.setText(str(computation_time) + "s") 
+       pixmap = QPixmap.fromImage(sift_image)
+       scene = QGraphicsScene()
+       scene.addPixmap(pixmap)
+       self.gv4.setScene(scene)
+       self.gv4.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+                          
+               
+            
+                  
+def main():
+    app = QApplication(sys.argv)
+    window = MainApp()
+    window.show()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
+               
