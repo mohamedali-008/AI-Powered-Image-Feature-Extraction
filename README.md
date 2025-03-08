@@ -20,7 +20,7 @@ MediVision is an **AI-driven computer vision application** designed for **featur
 
 **Example Output:**
 
-![Harris Corner Detection](images/harris_corners.png)
+![Harris Corner Detection](https://github.com/MO-Nigo/AI-Powered-Image-Feature-Extraction/blob/main/Images/Screenshot%202025-03-08%20073227.png)
 
 ### 2. **Feature Matching (SSD & NCC)**
 - Extracts SIFT descriptors from medical images.
