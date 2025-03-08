@@ -32,7 +32,7 @@ MediVision is an **AI-driven computer vision application** designed for **featur
 **Example Outputs:**
 
 - **SSD (Threshold = 630)**  
-  ![SSD Feature Matching](images/ssd_630.png)
+  ![SSD Feature Matching](https://github.com/MO-Nigo/AI-Powered-Image-Feature-Extraction/blob/main/Images/Screenshot%202025-03-08%20074254.png)
 - **NCC (Threshold = 0.5)**  
   ![NCC Feature Matching](images/ncc_05.png)
 
